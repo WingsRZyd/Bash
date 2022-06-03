@@ -1,0 +1,7 @@
+C:\Users\roma-\RiderProjects\Bash\Bash\obj\Debug\Bash.csproj.AssemblyReference.cache
+C:\Users\roma-\RiderProjects\Bash\Bash\obj\Debug\Bash.csproj.SuggestedBindingRedirects.cache
+C:\Users\roma-\RiderProjects\Bash\Bash\obj\Debug\Bash.csproj.CoreCompileInputs.cache
+C:\Users\roma-\RiderProjects\Bash\Bash\bin\Debug\Bash.exe
+C:\Users\roma-\RiderProjects\Bash\Bash\bin\Debug\Bash.pdb
+C:\Users\roma-\RiderProjects\Bash\Bash\obj\Debug\Bash.exe
+C:\Users\roma-\RiderProjects\Bash\Bash\obj\Debug\Bash.pdb
