@@ -13,7 +13,7 @@ namespace Bash
 
         public static void Main(string[] args)
         {
-            Program.start();
+            start();
         }
 
         public static void start()
@@ -22,6 +22,7 @@ namespace Bash
             string[] args;
             int status = 1;
             int result = 0;
+            bool flag;
 
 
 
@@ -38,6 +39,60 @@ namespace Bash
                     Console.Write(args[i], "\t");
                 }*/
 
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i] == "&&" || args[i] == "||" || args[i] == ";")
+                    {
+                        flag = true;
+                        switch (args[1])
+                        {
+                            case "&&":
+                                switch (args[0])
+                                {
+                                    case "pwd":
+                                        pwd();
+                                        result = 0;
+                                        break;
+                                    case "true":
+                                        result = 0;
+                                        break;
+                                    case "false":
+                                        result = 1;
+                                        break;
+                                }
+
+                                if (args[0] != "false")
+                                {
+                                    switch (args[2])
+                                    {
+                                        case "cat":
+                                            cat(args[3], result);
+                                            result = cat(args[3], result);
+                                            break;
+                                        case "echo":
+                                            if (args[3] == "$?")
+                                            {
+                                                prevResult(result);
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                echo(args);
+                                                result = 0;
+                                                break;
+                                            }
+                                        case "wc":
+                                            wc(args[3]);
+                                            break;
+                                    }
+                                }
+                                break;
+                            case "||":
+                                    
+                                
+                        }
+                    }
+            }
                 if (args.Length == 1)
                 {
                     switch (line)
@@ -77,6 +132,9 @@ namespace Bash
                                 result = 0;
                                 break;
                             }
+                        case "wc":
+                            wc(args[1]);
+                            break;
                             
                     }
                 }
@@ -143,6 +201,41 @@ namespace Bash
         public static void prevResult(int result)
         {
             Console.WriteLine(result);
+        }
+
+        public static void connectors()
+        {
+            
+        }
+        
+        
+        
+        
+
+        public static void wc(string path)
+        {
+            int count = File.ReadAllLines(path).Length;
+            Console.WriteLine("Count of string:");
+            Console.WriteLine(count);
+            string s = "" ;
+            string[] textMass;
+            StreamReader sr = new StreamReader(path);
+ 
+            while (sr.EndOfStream != true)
+            {
+                s += sr.ReadLine();                
+            }
+            textMass = s.Split(' ');
+            Console.WriteLine("Количество слов:");
+            Console.WriteLine(textMass.Length);
+ 
+            sr.Close();
+            
+            long bat;
+            bat = new FileInfo(path).Length;
+            Console.WriteLine("count of bytes");
+            Console.WriteLine(bat);
+
         }
     }
 }
