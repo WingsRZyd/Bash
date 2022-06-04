@@ -8,9 +8,6 @@ namespace Bash
 {
     internal class Program
     {
-
-        const int size = 1024;
-
         public static void Main(string[] args)
         {
             start();
@@ -24,13 +21,9 @@ namespace Bash
             int result = 0;
             bool flag = false;
 
-
-
-
-
+            
             do
             {
-                
                 Console.Write("> ");
                 line = Console.ReadLine();
                 args = line.Split();
@@ -240,8 +233,8 @@ namespace Bash
                     break;
             }
             return result;}
-
-
+        
+        
         public string[] split_line(string line)
         {
             string[] split_line = line.Split(new char[] {' '});
