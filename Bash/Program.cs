@@ -1,8 +1,11 @@
 ﻿using System;
+using System.CodeDom;
+using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using Microsoft.SqlServer.Server;
 
 namespace Bash
 {
@@ -20,8 +23,10 @@ namespace Bash
             int status = 1;
             int result = 0;
             bool flag = false;
+            string[] list = new string[1024];
+            Dictionary<string, string> variables = new Dictionary<string, string>();
 
-            
+
             do
             {
                 Console.Write("> ");
@@ -39,20 +44,20 @@ namespace Bash
                                 if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
                                     (args[2] == "pwd" || args[2] == "true" || args[2] == "false"))
                                 {
-                                    result = switchOneCondition(args,0);
+                                    result = switchOneCondition(args,0, list, variables);
                                     if (args[0] != "false")
                                     {
-                                        result = switchOneCondition(args, 2);
+                                        result = switchOneCondition(args, 2, list, variables);
                                     }
                                 }
 
                                 if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
                                     (args[2] == "cat" || args[2] == "echo" || args[2] == "wc"))
                                 {
-                                    result = switchOneCondition(args, 0);
+                                    result = switchOneCondition(args, 0, list, variables);
                                     if (args[0] != "false")
                                     {
-                                        switchTwoCondition(args, result, 2);
+                                        switchTwoCondition(args, result, 2, variables);
                                     }
                                 }
 
@@ -62,20 +67,20 @@ namespace Bash
                                 if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
                                     (args[2] == "pwd" || args[2] == "true" || args[2] == "false"))
                                 {
-                                    result = switchOneCondition(args, 0);
+                                    result = switchOneCondition(args, 0, list, variables);
                                     if (args[0] == "false")
                                     {
-                                        result = switchOneCondition(args, 2);
+                                        result = switchOneCondition(args, 2, list, variables);
                                     }
                                 }
 
                                 if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
                                     (args[2] == "cat" || args[2] == "echo" || args[2] == "wc"))
                                 {
-                                    result = switchOneCondition(args, 0);
+                                    result = switchOneCondition(args, 0, list, variables);
                                     if (args[0] == "false")
                                     {
-                                        switchTwoCondition(args, result, 2);
+                                        switchTwoCondition(args, result, 2, variables);
                                     }
                                 }
 
@@ -85,15 +90,15 @@ namespace Bash
                                 if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
                                     (args[2] == "pwd" || args[2] == "true" || args[2] == "false"))
                                 {
-                                    result = switchOneCondition(args, 0);
-                                    result = switchOneCondition(args, 2);
+                                    result = switchOneCondition(args, 0, list, variables);
+                                    result = switchOneCondition(args, 2, list, variables);
                                 }
 
                                 if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
                                     (args[2] == "cat" || args[2] == "echo" || args[2] == "wc"))
                                 {
-                                    result = switchOneCondition(args, 0);
-                                    switchTwoCondition(args, result, 2);
+                                    result = switchOneCondition(args, 0, list, variables);
+                                    switchTwoCondition(args, result, 2, variables);
                                 }
 
                                 break;
@@ -105,20 +110,20 @@ namespace Bash
                                 if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
                                     (args[3] == "pwd" || args[3] == "true" || args[3] == "false"))
                                 {
-                                    switchTwoCondition(args, result, 0);
+                                    switchTwoCondition(args, result, 0, variables);
                                     if (result == 0)
                                     {
-                                        result = switchOneCondition(args, 3);
+                                        result = switchOneCondition(args, 3, list, variables);
                                     }
                                 }
 
                                 if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
                                     (args[3] == "cat" || args[3] == "echo" || args[3] == "wc"))
                                 {
-                                    switchTwoCondition(args, result, 0);
+                                    switchTwoCondition(args, result, 0, variables);
                                     if (result == 0)
                                     {
-                                        switchTwoCondition(args, result, 3);
+                                        switchTwoCondition(args, result, 3, variables);
                                     }
                                 }
 
@@ -128,20 +133,20 @@ namespace Bash
                                 if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
                                     (args[3] == "pwd" || args[3] == "true" || args[3] == "false"))
                                 {
-                                    switchTwoCondition(args, result, 0);
+                                    switchTwoCondition(args, result, 0, variables);
                                     if (result != 0)
                                     {
-                                        result = switchOneCondition(args, 3);
+                                        result = switchOneCondition(args, 3, list, variables);
                                     }
                                 }
 
                                 if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
                                     (args[3] == "cat" || args[3] == "echo" || args[3] == "wc"))
                                 {
-                                    switchTwoCondition(args, result, 0);
+                                    switchTwoCondition(args, result, 0, variables);
                                     if (result != 0)
                                     {
-                                        switchTwoCondition(args, result, 3);
+                                        switchTwoCondition(args, result, 3, variables);
                                     }
                                 }
 
@@ -151,15 +156,15 @@ namespace Bash
                                 if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
                                     (args[3] == "pwd" || args[3] == "true" || args[3] == "false"))
                                 {
-                                    switchTwoCondition(args, result, 0);
-                                    result = switchOneCondition(args, 3);
+                                    switchTwoCondition(args, result, 0, variables);
+                                    result = switchOneCondition(args, 3, list, variables);
                                 }
 
                                 if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
                                     (args[3] == "cat" || args[3] == "echo" || args[3] == "wc"))
                                 {
-                                    switchTwoCondition(args, result, 0);
-                                    switchTwoCondition(args, result, 3);
+                                    switchTwoCondition(args, result, 0, variables);
+                                    switchTwoCondition(args, result, 3, variables);
                                 }
 
                                 break;
@@ -171,17 +176,17 @@ namespace Bash
                 {
                     if (args.Length == 1)
                     {
-                        result = switchOneCondition(args, 0);
+                        result = switchOneCondition(args, 0, list, variables);
                     }
                     else
                     {
-                        result = switchTwoCondition(args, result, 0);
+                        result = switchTwoCondition(args, result, 0, variables);
                     }
                 }
             } while (status != 0);
         }
 
-        public static int switchOneCondition(string[] args, int position)
+        public static int switchOneCondition(string[] args, int position, string[] list, Dictionary<string, string> variables)
         {
             int result;
             switch (args[position])
@@ -200,11 +205,16 @@ namespace Bash
                     return result;
                     break;
             }
+
+            if (args[0][0] == '$')
+            {
+                localVariables(list, args, variables);
+            }
             return 0;
             
         }
 
-        public static int switchTwoCondition(string[] args, int result1, int position)
+        public static int switchTwoCondition(string[] args, int result1, int position, Dictionary<string, string> variables)
         {
             int result = 0;
             switch (args[position])
@@ -219,6 +229,22 @@ namespace Bash
                         prevResult(result1);
                         return result1;
                         break;
+                    }
+                    else if (args[position+1][0] == '$')
+                    {
+                        string name = getName(args[position + 1]);
+                        try
+                        {
+                            Console.WriteLine(variables[name]);
+                        }
+                        catch (KeyNotFoundException e)
+                        {
+                            Console.WriteLine($"Warning: {e.Message}");
+                            result = 1;
+                            return result;
+                        }
+                        
+                        return result;
                     }
                     else
                     {
@@ -316,5 +342,51 @@ namespace Bash
             Console.WriteLine(bat);
 
         }
+
+        public static Dictionary<string, string> localVariables(string[] list, string[] args, Dictionary<string, string> variables)
+        {
+            string elem = "";
+            string name = "";
+            bool flag = true;
+            for (int i = 1; i < args[0].Length - 1; i++)
+            {
+                if (args[0][i] != '=' && flag == true)
+                {
+                    name = name.Insert(name.Length, args[0][i].ToString());
+                }
+                else
+                {
+                    flag = false;
+                }
+
+                if (flag == false)
+                {
+                    elem = elem.Insert(elem.Length, args[0][i + 1].ToString());
+                }
+                
+            }
+            variables.Add(name, elem);
+            return variables;
+        }
+
+        public static string getName(string arg)
+        {
+            string name = "";
+            for (int i = 1; i < arg.Length; i++)
+            {
+                if (arg[i] != '=')
+                {
+                    name = name.Insert(name.Length, arg[i].ToString());
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return name;
+        }
+        
+        
     }
 }
