@@ -22,7 +22,7 @@ namespace Bash
             string[] args;
             int status = 1;
             int result = 0;
-            bool flag;
+            bool flag = false;
 
 
 
@@ -34,10 +34,6 @@ namespace Bash
                 Console.Write("> ");
                 line = Console.ReadLine();
                 args = line.Split();
-                /*for (int i = 0; i < args.Length; i++)
-                {
-                    Console.Write(args[i], "\t");
-                }*/
 
                 for (int i = 0; i < args.Length; i++)
                 {
@@ -47,104 +43,193 @@ namespace Bash
                         switch (args[1])
                         {
                             case "&&":
-                                switch (args[0])
+                                if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
+                                    (args[2] == "pwd" || args[2] == "true" || args[2] == "false"))
                                 {
-                                    case "pwd":
-                                        pwd();
-                                        result = 0;
-                                        break;
-                                    case "true":
-                                        result = 0;
-                                        break;
-                                    case "false":
-                                        result = 1;
-                                        break;
-                                }
-
-                                if (args[0] != "false")
-                                {
-                                    switch (args[2])
+                                    switchOneCondition(args, result, 0);
+                                    if (args[0] != "false")
                                     {
-                                        case "cat":
-                                            cat(args[3], result);
-                                            result = cat(args[3], result);
-                                            break;
-                                        case "echo":
-                                            if (args[3] == "$?")
-                                            {
-                                                prevResult(result);
-                                                break;
-                                            }
-                                            else
-                                            {
-                                                echo(args);
-                                                result = 0;
-                                                break;
-                                            }
-                                        case "wc":
-                                            wc(args[3]);
-                                            break;
+                                        switchOneCondition(args, result, 2);
                                     }
                                 }
+
+                                if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
+                                    (args[2] == "cat" || args[2] == "echo" || args[2] == "wc"))
+                                {
+                                    switchOneCondition(args, result, 0);
+                                    if (args[0] != "false")
+                                    {
+                                        switchTwoCondition(args, result, 2);
+                                    }
+                                }
+
                                 break;
+
                             case "||":
-                                    
-                                
+                                if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
+                                    (args[2] == "pwd" || args[2] == "true" || args[2] == "false"))
+                                {
+                                    switchOneCondition(args, result, 0);
+                                    if (args[0] == "false")
+                                    {
+                                        switchOneCondition(args, result, 2);
+                                    }
+                                }
+
+                                if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
+                                    (args[2] == "cat" || args[2] == "echo" || args[2] == "wc"))
+                                {
+                                    switchOneCondition(args, result, 0);
+                                    if (args[0] == "false")
+                                    {
+                                        switchTwoCondition(args, result, 2);
+                                    }
+                                }
+
+                                break;
+
+                            case ";":
+                                if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
+                                    (args[2] == "pwd" || args[2] == "true" || args[2] == "false"))
+                                {
+                                    switchOneCondition(args, result, 0);
+                                    switchOneCondition(args, result, 2);
+                                }
+
+                                if ((args[0] == "pwd" || args[0] == "true" || args[0] == "false") &&
+                                    (args[2] == "cat" || args[2] == "echo" || args[2] == "wc"))
+                                {
+                                    switchOneCondition(args, result, 0);
+                                    switchTwoCondition(args, result, 2);
+                                }
+
+                                break;
                         }
-                    }
-            }
-                if (args.Length == 1)
-                {
-                    switch (line)
-                    {
-                        case "pwd":
-                            pwd();
-                            result = 0;
-                            break;
-                        case "true":
-                            result = 0;
-                            break;
-                        case "false":
-                            result = 1;
-                            break;
-                        /*case "$?":
-                            prevResult(result);
-                            break;*/
-                    }
-                }
-                else
-                {
-                    switch (args[0])
-                    {
-                        case "cat":
-                            cat(args[1], result);
-                            result = cat(args[1], result);
-                            break;
-                        case "echo":
-                            if (args[1] == "$?")
-                            {
-                                prevResult(result);
+
+                        switch (args[2])
+                        {
+                            case "&&":
+                                if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
+                                    (args[3] == "pwd" || args[3] == "true" || args[3] == "false"))
+                                {
+                                    switchTwoCondition(args, result, 0);
+                                    if (result == 0)
+                                    {
+                                        switchOneCondition(args, result, 3);
+                                    }
+                                }
+
+                                if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
+                                    (args[3] == "cat" || args[3] == "echo" || args[3] == "wc"))
+                                {
+                                    switchTwoCondition(args, result, 0);
+                                    if (result == 0)
+                                    {
+                                        switchTwoCondition(args, result, 3);
+                                    }
+                                }
+
                                 break;
-                            }
-                            else
-                            {
-                                echo(args);
-                                result = 0;
+
+                            case "||":
+                                if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
+                                    (args[3] == "pwd" || args[3] == "true" || args[3] == "false"))
+                                {
+                                    switchTwoCondition(args, result, 0);
+                                    if (result != 0)
+                                    {
+                                        switchOneCondition(args, result, 3);
+                                    }
+                                }
+
+                                if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
+                                    (args[3] == "cat" || args[3] == "echo" || args[3] == "wc"))
+                                {
+                                    switchTwoCondition(args, result, 0);
+                                    if (result != 0)
+                                    {
+                                        switchTwoCondition(args, result, 3);
+                                    }
+                                }
+
                                 break;
-                            }
-                        case "wc":
-                            wc(args[1]);
-                            break;
-                            
+
+                            case ";":
+                                if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
+                                    (args[3] == "pwd" || args[3] == "true" || args[3] == "false"))
+                                {
+                                    switchTwoCondition(args, result, 0);
+                                    switchOneCondition(args, result, 3);
+                                }
+
+                                if ((args[0] == "cat" || args[0] == "echo" || args[0] == "wc") &&
+                                    (args[3] == "cat" || args[3] == "echo" || args[3] == "wc"))
+                                {
+                                    switchTwoCondition(args, result, 0);
+                                    switchTwoCondition(args, result, 3);
+                                }
+
+                                break;
+                        }
                     }
                 }
 
-                //Console.WriteLine(line);
-                //Console.WriteLine(args.Length);
-                //status = execute(args);
+                if (flag == false)
+                {
+                    if (args.Length == 1)
+                    {
+                        switchOneCondition(args, result, 0);
+                    }
+                    else
+                    {
+                        switchTwoCondition(args, result, 0);
+                    }
+                }
             } while (status != 0);
         }
 
+        public static void switchOneCondition(string[] args, int result, int position)
+        {
+            switch (args[position])
+            {
+                case "pwd":
+                    pwd();
+                    result = 0;
+                    break;
+                case "true":
+                    result = 0;
+                    break;
+                case "false":
+                    result = 1;
+                    break;
+            }
+        }
+
+        public static void switchTwoCondition(string[] args, int result1, int position)
+        {
+            int result;
+            switch (args[position])
+            {
+                case "cat":
+                    result = cat(args[position+1], result1);
+                    break;
+                case "echo":
+                    if (args[position+1] == "$?")
+                    {
+                        prevResult(result1);
+                        break;
+                    }
+                    else
+                    {
+                        echo(args);
+                        result1 = 0;
+                        break;
+                    }
+                case "wc":
+                    wc(args[position+1]);
+                    break;
+            }
+        }
 
 
         public string[] split_line(string line)
@@ -202,15 +287,6 @@ namespace Bash
         {
             Console.WriteLine(result);
         }
-
-        public static void connectors()
-        {
-            
-        }
-        
-        
-        
-        
 
         public static void wc(string path)
         {
