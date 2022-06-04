@@ -169,6 +169,31 @@ namespace Bash
 
                                 break;
                         }
+
+                        switch (args[4])
+                        {
+                            case "&&":
+                                if (args[5] == "pwd" || args[5] == "true" || args[5] == "false")
+                                {
+                                    switchTwoCondition(args, result, 0, variables);
+                                    if (result == 0)
+                                    {
+                                        result = switchOneCondition(args, 5, list, variables);
+                                    }
+                                }
+                                
+                                if (args[5] == "echo" || args[5] == "cat" || args[5] == "wc")
+                                {
+                                    switchTwoCondition(args, result, 0, variables);
+                                    if (result == 0)
+                                    {
+                                        result = switchTwoCondition(args, result, 5, variables);
+                                    }
+                                }
+
+                                break;
+                        }
+                        
                     }
                 }
 
@@ -232,7 +257,7 @@ namespace Bash
                     }
                     else if (args[position+1][0] == '$')
                     {
-                        string name = getName(args[position + 1]);
+                        string name = getNameWithoutDollar(args[position + 1]);
                         try
                         {
                             Console.WriteLine(variables[name]);
@@ -246,6 +271,17 @@ namespace Bash
                         
                         return result;
                     }
+                    else if (args[position + 2] == ">>")
+                    {
+                        arrowRight(args, position, true);
+                        return result;
+                    }
+                    else if (args[position + 2][0] == '>')
+                    {
+                        arrowRight(args, position, false);
+                        return result;
+                    }
+                    
                     else
                     {
                         echo(args);
@@ -369,7 +405,7 @@ namespace Bash
             return variables;
         }
 
-        public static string getName(string arg)
+        public static string getNameWithoutDollar(string arg)
         {
             string name = "";
             for (int i = 1; i < arg.Length; i++)
@@ -387,6 +423,35 @@ namespace Bash
             return name;
         }
         
-        
+        public static string getName(string arg)
+        {
+            string name = "";
+            for (int i = 0; i < arg.Length; i++)
+            {
+                if (arg[i] != '=')
+                {
+                    name = name.Insert(name.Length, arg[i].ToString());
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return name;
+        }
+
+        public static void arrowRight(string[] args, int position, bool flag)
+        {
+            string name = getName(args[position + 1]);
+            string halfPath = getName(args[position + 3]);
+            
+            
+            using (StreamWriter writer = new StreamWriter(halfPath, flag))
+            {
+                writer.WriteLine(name);
+                Console.WriteLine(name);
+            }
+       }
     }
 }
